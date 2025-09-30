@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>公因數消消樂</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FFFDE4 0%, #FFE7C7 100%);
+      font-family: "Noto Sans TC", "Segoe UI", "Arial", sans-serif;
+      color: #5b4c2b;
+      overflow: hidden;
+      position: relative;
+    }
+    .game-container {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #fffbe6;
+      border-radius: 32px;
+      box-shadow: 0 8px 24px 0 #efd48580;
+      padding: 32px 24px 24px 24px;
+      max-width: 700px;
+      width: 95vw;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    #mainTitle {
+      font-size: 3em;
+      font-weight: bold;
+      color: #d2a700;
+      text-align: center;
+      margin-top: 38px;
+      margin-bottom: 70px;
+      letter-spacing: 0.12em;
+      text-shadow: 0 4px 18px #ffecb1, 0 1px 0 #fffbe6;
+      user-select: none;
+    }
+    #timer {
+      position: absolute;
+      right: 18px;
+      top: 20px;
+      font-size: 1.25em;
+      background: #fff6c1;
+      color: #d2a700;
+      padding: 7px 18px;
+      border-radius: 15px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px #eddc7a60;
+      letter-spacing: 2px;
+      z-index: 15;
+      border: 2px solid #ffe6b0;
+      min-width: 90px;
+      text-align: center;
+    }
+    #restartBtn {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      z-index: 10;
+      font-size: 1em;
+      padding: 8px 18px;
+      background: linear-gradient(90deg, #FFD955 0%, #FFED89 100%);
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #eac25e50;
+      color: #7e6a2b;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    #restartBtn:hover {
+      transform: scale(1.07);
+      box-shadow: 0 6px 18px #eac25e70;
+      background: linear-gradient(90deg, #FFED89 0%, #FFD955 100%);
+    }
+    #startBtn, #retryBtn {
+      background: linear-gradient(90deg, #FFD955 0%, #FFED89 100%);
+      border: none;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px #eac25e50;
+      color: #7e6a2b;
+      font-size: 2em;
+      padding: 16px 48px;
+      margin: 0 auto 24px auto;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: block;
+      outline: none;
+    }
+    #startBtn {
+      margin-top: 90px;
+    }
+    #startBtn:hover, #retryBtn:hover {
+      transform: scale(1.07);
+      box-shadow: 0 6px 18px #eac25e70;
+      background: linear-gradient(90deg, #FFED89 0%, #FFD955 100%);
+    }
+    #levelInfo {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 12px;
+      margin-top: 8px;
+      color: #a19051;
+      letter-spacing: 2px;
+    }
+    #lockMsg {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #e48c26;
+      margin: 25px 0px 0px 0px;
+      display: none;
+      white-space: pre-line;
+      text-align: center;
+    }
+    #board {
+      display: grid;
+      gap: 12px;
+      margin: 24px auto 0 auto;
+      justify-content: center;
+      align-content: center;
+      min-height: 120px;
+    }
+    .cell {
+      background: #fff6c1;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px #eddc7a60;
+      border: 2px solid #ffe6b0;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #d2a700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.18s;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .cell.selected {
+      background: #ffe37f;
+      border-color: #ffd955;
+      box-shadow: 0 4px 18px #ffe37f90;
+      color: #e48c26;
+      z-index: 2;
+    }
+    .cell:active {
+      transform: scale(1.06);
+    }
+    .cell.eliminated {
+      background: #fff;
+      color: #fff;
+      border-color: #fff;
+      pointer-events: none;
+      box-shadow: none;
+      opacity: 0.5;
+    }
+    .cell.locked {
+      background: #f5f5f5 !important;
+      color: #bbb !important;
+      border-color: #f5f5f5 !important;
+      pointer-events: none !important;
+      box-shadow: none !important;
+      opacity: 0.5 !important;
+    }
+    @media (max-width: 900px) {
+      .game-container {
+        max-width: 98vw;
+        width: 98vw;
+      }
+      #board {
+        gap: 7px;
+      }
+      .cell {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1em;
+      }
+      #startBtn, #retryBtn {
+        font-size: 1.2em;
+        padding: 10px 28px;
+      }
+      #restartBtn {
+        font-size: 0.9em;
+        padding: 6px 14px;
+        top: 8px;
+        left: 8px;
+      }
+      #timer {
+        font-size: 1em;
+        padding: 4px 10px;
+        top: 8px;
+        right: 8px;
+        min-width: 70px;
+      }
+      #mainTitle {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div id="mainTitle">公因數消消樂</div>
+    <button id="restartBtn">Restart</button>
+    <div id="timer">06:00</div>
+    <button id="startBtn">START</button>
+    <button id="retryBtn">重新開始</button>
+    <div id="levelInfo" style="display:none"></div>
+    <div id="lockMsg"></div>
+    <div id="board"></div>
+  </div>
+  <script>
+    // 新題庫
+    const levels = [
+      {rows:1, cols:2, nums:[2, 2]},
+      {rows:1, cols:2, nums:[15, 15]},
+      {rows:2, cols:2, nums:[2, 4, 32, 16]},
+      {rows:2, cols:2, nums:[3, 27, 9, 81]},
+      {rows:2, cols:2, nums:[35, 11, 7, 55]},
+      {rows:2, cols:2, nums:[5, 40, 10, 20]},
+      {rows:2, cols:2, nums:[39, 26, 6, 169]},
+      {rows:2, cols:2, nums:[12, 24, 8, 16]},
+      {rows:2, cols:2, nums:[18, 24, 12, 36]},
+      {rows:2, cols:3, nums:[12, 18, 48, 36, 6, 3]},
+      {rows:2, cols:3, nums:[8, 16, 96, 32, 4, 6]},
+      {rows:3, cols:3, nums:[243, 81, 27, 9, 3, 18, 54, 108, 12]},
+      {rows:3, cols:3, nums:[20, 40, 80, 160, 50, 20, 40, 80, 5]},
+      {rows:3, cols:3, nums:[8, 16, 32, 128, 4, 8, 16, 32, 2]},
+      {rows:3, cols:3, nums:[27, 9, 3, 81, 243, 729, 9, 81, 243]},
+      {rows:3, cols:4, nums:[35, 14, 80, 48, 18, 625, 25, 15, 245, 49, 125, 45]},
+      {rows:3, cols:4, nums:[121, 88, 56, 49, 26, 65, 44, 72, 18, 8, 25, 35]},
+      {rows:3, cols:4, nums:[169, 196, 182, 42, 39, 75, 15, 35, 21, 80, 16, 15]},
+      {rows:3, cols:4, nums:[289, 68, 210, 48, 18, 35, 49, 56, 80, 90, 168, 102]},
+      {rows:4, cols:4, nums:[20, 4, 66, 104, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,32]},
+      {rows:4, cols:4, nums:[6, 21, 28, 45, 13, 23, 29, 17, 25, 63, 35, 84, 69, 39, 203, 102]}
+    ];
+    let curLevel = -1;
+    let board = [];
+    let selected = [];
+
+    // 倒數計時
+    const TOTAL_SECONDS = 360; // 6分鐘
+    let timerInterval = null;
+    let remainSec = TOTAL_SECONDS;
+    let timerRunning = false;
+    let lockState = false;
+    let finishedCount = 0;
+
+    function startCountdownTimer() {
+      if (timerRunning) return;
+      remainSec = TOTAL_SECONDS;
+      lockState = false;
+      finishedCount = 0;
+      updateTimerText(remainSec);
+      timerRunning = true;
+      document.getElementById('lockMsg').style.display = 'none';
+      timerInterval = setInterval(() => {
+        remainSec--;
+        updateTimerText(remainSec);
+        if (remainSec <= 0) {
+          timerRunning = false;
+          clearInterval(timerInterval);
+          lockGame();
+        }
+      }, 1000);
+    }
+
+    function updateTimerText(sec) {
+      if (sec <= 0) sec = 0;
+      const min = Math.floor(sec / 60);
+      const s = sec % 60;
+      document.getElementById('timer').textContent =
+        `${min.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+    }
+
+    function lockGame() {
+      lockState = true;
+      document.getElementById('lockMsg').style.display = '';
+      document.getElementById('lockMsg').textContent =
+        `時間到！\n已完成關卡數：${finishedCount}`;
+      document.getElementById('levelInfo').style.display = 'none';
+      renderBoard(); // 盤面加鎖
+    }
+
+    function renderBoard() {
+      const lv = levels[curLevel];
+      const grid = document.getElementById('board');
+      grid.innerHTML = '';
+      if (!lv) return;
+      grid.style.gridTemplateRows = `repeat(${lv.rows}, 1fr)`;
+      grid.style.gridTemplateColumns = `repeat(${lv.cols}, 1fr)`;
+
+      board.forEach((num, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (lockState) cell.classList.add('locked');
+        else {
+          if (num <= 1) cell.classList.add('eliminated');
+          if (selected.includes(idx)) cell.classList.add('selected');
+        }
+        cell.textContent = num > 1 && !lockState ? num : (lockState ? '' : '');
+        cell.onclick = () => { if (!lockState) selectCell(idx); };
+        grid.appendChild(cell);
+      });
+    }
+
+    function showStartScreen() {
+      document.getElementById('mainTitle').style.display = '';
+      document.getElementById('startBtn').style.display = '';
+      document.getElementById('retryBtn').style.display = 'none';
+      document.getElementById('lockMsg').style.display = 'none';
+      document.getElementById('levelInfo').style.display = 'none';
+      document.getElementById('board').innerHTML = '';
+      updateTimerText(TOTAL_SECONDS);
+      stopTimer();
+      lockState = false;
+      finishedCount = 0;
+    }
+
+    function startLevel(levelIdx) {
+      curLevel = levelIdx;
+      board = levels[curLevel].nums.slice();
+      selected = [];
+      document.getElementById('mainTitle').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('retryBtn').style.display = 'none';
+      document.getElementById('lockMsg').style.display = 'none';
+      document.getElementById('levelInfo').style.display = '';
+      document.getElementById('levelInfo').textContent = `第 ${curLevel+1} 關`;
+      renderBoard();
+    }
+
+    function selectCell(idx) {
+      if (board[idx] <= 1) return;
+      if (selected.includes(idx)) {
+        selected = selected.filter(x => x !== idx);
+        renderBoard();
+        return;
+      }
+      if (selected.length == 2) selected = [];
+      selected.push(idx);
+      renderBoard();
+      if (selected.length == 2) setTimeout(checkPair, 200);
+    }
+
+    function checkPair() {
+      if (lockState) return;
+      const [a, b] = selected;
+      if (board[a] <= 1 || board[b] <= 1) {
+        selected = [];
+        renderBoard();
+        return;
+      }
+      if (board[a] === board[b]) {
+        board[a] = 1; board[b] = 1;
+        selected = [];
+        renderBoard();
+        checkWin();
+        return;
+      }
+      const gcd = (x, y) => y==0?x:gcd(y, x%y);
+      const g = gcd(board[a], board[b]);
+      if (g > 1) {
+        board[a] /= g;
+        board[b] /= g;
+        selected = [];
+        renderBoard();
+        checkWin();
+      } else {
+        selected = [];
+        renderBoard();
+      }
+    }
+
+    function checkWin() {
+      if (lockState) return;
+      if (board.every(x=>x<=1)) {
+        finishedCount++;
+        setTimeout(()=>{
+          if (curLevel < levels.length-1) {
+            startLevel(curLevel+1);
+          } else {
+            stopTimer();
+            document.getElementById('levelInfo').textContent =
+              `全部通關！\n用時 ${document.getElementById('timer').textContent}`;
+            document.getElementById('board').innerHTML = '';
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('mainTitle').style.display = '';
+          }
+        },350);
+      }
+      else if (!canEliminate()) {
+        document.getElementById('retryBtn').style.display = '';
+      }
+    }
+
+    function canEliminate() {
+      for (let i=0; i<board.length; ++i) {
+        if (board[i]<=1) continue;
+        for (let j=i+1; j<board.length; ++j) {
+          if (board[j]<=1) continue;
+          if (board[i] === board[j]) return true;
+          const gcd = (x, y) => y==0?x:gcd(y, x%y);
+          if (gcd(board[i], board[j])>1) return true;
+        }
+      }
+      return false;
+    }
+
+    document.getElementById('startBtn').onclick = ()=>{
+      startLevel(0);
+      startCountdownTimer();
+      document.getElementById('mainTitle').style.display = 'none';
+    };
+    document.getElementById('retryBtn').onclick = ()=>{
+      if (lockState) return;
+      startLevel(curLevel);
+      // timer continues
+    };
+    document.getElementById('restartBtn').onclick = ()=>{
+      if (lockState) return;
+      startLevel(curLevel);
+      // timer continues
+    };
+
+    // 起始畫面顯示
+    showStartScreen();
+  </script>
+</body>
+</html>
