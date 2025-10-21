@@ -216,7 +216,7 @@
   <div class="game-container">
     <div id="mainTitle">公因數消消樂</div>
     <button id="restartBtn">Restart</button>
-    <div id="timer">06:00</div>
+    <div id="timer">05:00</div>
     <button id="startBtn">START</button>
     <button id="retryBtn">重新開始</button>
     <div id="levelInfo" style="display:none"></div>
@@ -224,226 +224,262 @@
     <div id="board"></div>
   </div>
   <script>
-    // 新題庫
-    const levels = [
-      {rows:1, cols:2, nums:[2, 2]},
-      {rows:1, cols:2, nums:[15, 15]},
-      {rows:2, cols:2, nums:[2, 4, 32, 16]},
-      {rows:2, cols:2, nums:[3, 27, 9, 81]},
-      {rows:2, cols:2, nums:[35, 11, 7, 55]},
-      {rows:2, cols:2, nums:[5, 40, 10, 20]},
-      {rows:2, cols:2, nums:[39, 26, 6, 169]},
-      {rows:2, cols:2, nums:[12, 24, 8, 16]},
-      {rows:2, cols:2, nums:[18, 24, 12, 36]},
-      {rows:2, cols:3, nums:[12, 18, 48, 36, 6, 3]},
-      {rows:2, cols:3, nums:[8, 16, 96, 32, 4, 6]},
-      {rows:3, cols:3, nums:[243, 81, 27, 9, 3, 18, 54, 108, 12]},
-      {rows:3, cols:3, nums:[20, 40, 80, 160, 50, 20, 40, 80, 5]},
-      {rows:3, cols:3, nums:[8, 16, 32, 128, 4, 8, 16, 32, 2]},
-      {rows:3, cols:3, nums:[27, 9, 3, 81, 243, 729, 9, 81, 243]},
-      {rows:3, cols:4, nums:[35, 14, 80, 48, 18, 625, 25, 15, 245, 49, 125, 45]},
-      {rows:3, cols:4, nums:[121, 88, 56, 49, 26, 65, 44, 72, 18, 8, 25, 35]},
-      {rows:3, cols:4, nums:[169, 196, 182, 42, 39, 75, 15, 35, 21, 80, 16, 15]},
-      {rows:3, cols:4, nums:[289, 68, 210, 48, 18, 35, 49, 56, 80, 90, 168, 102]},
-      {rows:4, cols:4, nums:[20, 4, 66, 104, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,32]},
-      {rows:4, cols:4, nums:[6, 21, 28, 45, 13, 23, 29, 17, 25, 63, 35, 84, 69, 39, 203, 102]}
-    ];
-    let curLevel = -1;
-    let board = [];
-    let selected = [];
+  // 新題庫
+  const levels = [
+    {rows:2, cols:3, nums:[4, 8, 12, 18, 6, 8]},
+    {rows:2, cols:3, nums:[12, 18, 48, 36, 6, 3]},
+    {rows:2, cols:3, nums:[5, 10, 6, 8, 2, 12]},
+    {rows:2, cols:3, nums:[7, 14, 21, 42, 36, 4]},
+    {rows:2, cols:3, nums:[18, 48, 36, 27, 9, 18]},
+    {rows:2, cols:3, nums:[5, 20, 15, 30, 45, 90]},
+    {rows:2, cols:3, nums:[8, 16, 96, 32, 4, 6]},
+    {rows:3, cols:3, nums:[243, 81, 27, 9, 3, 18, 54, 108, 12]},
+    {rows:3, cols:3, nums:[20, 40, 80, 160, 50, 20, 40, 80, 5]},
+    {rows:3, cols:3, nums:[8, 16, 32, 128, 4, 8, 16, 32, 2]},
+    {rows:3, cols:3, nums:[27, 9, 3, 81, 243, 729, 9, 81, 243]},
+    {rows:3, cols:4, nums:[35, 14, 80, 48, 18, 625, 25, 15, 245, 49, 125, 45]},
+    {rows:3, cols:4, nums:[121, 88, 56, 49, 26, 65, 44, 72, 18, 8, 25, 35]},
+    {rows:3, cols:4, nums:[169, 196, 182, 42, 39, 75, 15, 35, 21, 80, 16, 15]},
+    {rows:3, cols:4, nums:[289, 68, 210, 48, 18, 35, 49, 56, 80, 90, 168, 102]},
+    {rows:4, cols:4, nums:[20, 4, 66, 104, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,32]},
+    {rows:4, cols:4, nums:[6, 21, 28, 45, 13, 23, 29, 17, 25, 63, 35, 84, 69, 39, 203, 102]}
+  ];
+  let curLevel = -1;
+  let board = [];
+  let selected = [];
 
-    // 倒數計時
-    const TOTAL_SECONDS = 360; // 6分鐘
-    let timerInterval = null;
-    let remainSec = TOTAL_SECONDS;
-    let timerRunning = false;
-    let lockState = false;
-    let finishedCount = 0;
+  // 倒數計時
+  const TOTAL_SECONDS = 300; // 5分鐘
+  let timerInterval = null;
+  let remainSec = TOTAL_SECONDS;
+  let timerRunning = false;
+  let lockState = false;
+  let finishedCount = 0;
 
-    function startCountdownTimer() {
-      if (timerRunning) return;
-      remainSec = TOTAL_SECONDS;
-      lockState = false;
-      finishedCount = 0;
+  function startCountdownTimer() {
+    if (timerRunning) return;
+    remainSec = TOTAL_SECONDS;
+    lockState = false;
+    finishedCount = 0;
+    updateTimerText(remainSec);
+    timerRunning = true;
+    document.getElementById('lockMsg').style.display = 'none';
+    removeOverlay(); // 移除遮罩
+    timerInterval = setInterval(() => {
+      remainSec--;
       updateTimerText(remainSec);
-      timerRunning = true;
-      document.getElementById('lockMsg').style.display = 'none';
-      timerInterval = setInterval(() => {
-        remainSec--;
-        updateTimerText(remainSec);
-        if (remainSec <= 0) {
-          timerRunning = false;
-          clearInterval(timerInterval);
-          lockGame();
-        }
-      }, 1000);
+      if (remainSec <= 0) {
+        timerRunning = false;
+        clearInterval(timerInterval);
+        lockGame();
+      }
+    }, 1000);
+  }
+
+  function updateTimerText(sec) {
+    if (sec <= 0) sec = 0;
+    const min = Math.floor(sec / 60);
+    const s = sec % 60;
+    document.getElementById('timer').textContent =
+      `${min.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+  }
+
+  // ✅ 新增：鎖定全頁並顯示完成訊息
+  function lockGame() {
+    lockState = true;
+    document.getElementById('lockMsg').style.display = '';
+    document.getElementById('lockMsg').textContent =
+      `時間到！\n已完成關卡數：${finishedCount}`;
+    document.getElementById('levelInfo').style.display = 'none';
+    renderBoard();
+    showOverlay(); // 🔒 全畫面鎖定
+  }
+
+  // ✅ 新增：黑色半透明遮罩 + 阻擋所有操作
+  function showOverlay() {
+    let overlay = document.createElement('div');
+    overlay.id = 'gameOverlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.4)';
+    overlay.style.zIndex = 9999;
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.fontSize = '2em';
+    overlay.style.color = '#fff';
+    overlay.style.fontWeight = 'bold';
+    overlay.style.flexDirection = 'column';
+    overlay.innerHTML = `<div>時間到！</div><div>已完成關卡數：${finishedCount}</div>`;
+    document.body.appendChild(overlay);
+
+    // 停用所有鍵盤與滑鼠輸入
+    window.addEventListener('keydown', preventAll, true);
+    window.addEventListener('mousedown', preventAll, true);
+    window.addEventListener('touchstart', preventAll, true);
+  }
+
+  function removeOverlay() {
+    const o = document.getElementById('gameOverlay');
+    if (o) o.remove();
+    window.removeEventListener('keydown', preventAll, true);
+    window.removeEventListener('mousedown', preventAll, true);
+    window.removeEventListener('touchstart', preventAll, true);
+  }
+
+  function preventAll(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    return false;
+  }
+
+  function renderBoard() {
+    const lv = levels[curLevel];
+    const grid = document.getElementById('board');
+    grid.innerHTML = '';
+    if (!lv) return;
+    grid.style.gridTemplateRows = `repeat(${lv.rows}, 1fr)`;
+    grid.style.gridTemplateColumns = `repeat(${lv.cols}, 1fr)`;
+
+    board.forEach((num, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (lockState) cell.classList.add('locked');
+      else {
+        if (num <= 1) cell.classList.add('eliminated');
+        if (selected.includes(idx)) cell.classList.add('selected');
+      }
+      cell.textContent = num > 1 && !lockState ? num : (lockState ? '' : '');
+      cell.onclick = () => { if (!lockState) selectCell(idx); };
+      grid.appendChild(cell);
+    });
+  }
+
+  function showStartScreen() {
+    document.getElementById('mainTitle').style.display = '';
+    document.getElementById('startBtn').style.display = '';
+    document.getElementById('retryBtn').style.display = 'none';
+    document.getElementById('lockMsg').style.display = 'none';
+    document.getElementById('levelInfo').style.display = 'none';
+    document.getElementById('board').innerHTML = '';
+    updateTimerText(TOTAL_SECONDS);
+    stopTimer();
+    lockState = false;
+    finishedCount = 0;
+    removeOverlay();
+  }
+
+  function startLevel(levelIdx) {
+    curLevel = levelIdx;
+    board = levels[curLevel].nums.slice();
+    selected = [];
+    document.getElementById('mainTitle').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('retryBtn').style.display = 'none';
+    document.getElementById('lockMsg').style.display = 'none';
+    document.getElementById('levelInfo').style.display = '';
+    document.getElementById('levelInfo').textContent = `第 ${curLevel+1} 關`;
+    renderBoard();
+  }
+
+  function selectCell(idx) {
+    if (board[idx] <= 1) return;
+    if (selected.includes(idx)) {
+      selected = selected.filter(x => x !== idx);
+      renderBoard();
+      return;
     }
+    if (selected.length == 2) selected = [];
+    selected.push(idx);
+    renderBoard();
+    if (selected.length == 2) setTimeout(checkPair, 200);
+  }
 
-    function updateTimerText(sec) {
-      if (sec <= 0) sec = 0;
-      const min = Math.floor(sec / 60);
-      const s = sec % 60;
-      document.getElementById('timer').textContent =
-        `${min.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-      timerRunning = false;
-    }
-
-    function lockGame() {
-      lockState = true;
-      document.getElementById('lockMsg').style.display = '';
-      document.getElementById('lockMsg').textContent =
-        `時間到！\n已完成關卡數：${finishedCount}`;
-      document.getElementById('levelInfo').style.display = 'none';
-      renderBoard(); // 盤面加鎖
-    }
-
-    function renderBoard() {
-      const lv = levels[curLevel];
-      const grid = document.getElementById('board');
-      grid.innerHTML = '';
-      if (!lv) return;
-      grid.style.gridTemplateRows = `repeat(${lv.rows}, 1fr)`;
-      grid.style.gridTemplateColumns = `repeat(${lv.cols}, 1fr)`;
-
-      board.forEach((num, idx) => {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        if (lockState) cell.classList.add('locked');
-        else {
-          if (num <= 1) cell.classList.add('eliminated');
-          if (selected.includes(idx)) cell.classList.add('selected');
-        }
-        cell.textContent = num > 1 && !lockState ? num : (lockState ? '' : '');
-        cell.onclick = () => { if (!lockState) selectCell(idx); };
-        grid.appendChild(cell);
-      });
-    }
-
-    function showStartScreen() {
-      document.getElementById('mainTitle').style.display = '';
-      document.getElementById('startBtn').style.display = '';
-      document.getElementById('retryBtn').style.display = 'none';
-      document.getElementById('lockMsg').style.display = 'none';
-      document.getElementById('levelInfo').style.display = 'none';
-      document.getElementById('board').innerHTML = '';
-      updateTimerText(TOTAL_SECONDS);
-      stopTimer();
-      lockState = false;
-      finishedCount = 0;
-    }
-
-    function startLevel(levelIdx) {
-      curLevel = levelIdx;
-      board = levels[curLevel].nums.slice();
+  function checkPair() {
+    if (lockState) return;
+    const [a, b] = selected;
+    if (board[a] <= 1 || board[b] <= 1) {
       selected = [];
-      document.getElementById('mainTitle').style.display = 'none';
-      document.getElementById('startBtn').style.display = 'none';
-      document.getElementById('retryBtn').style.display = 'none';
-      document.getElementById('lockMsg').style.display = 'none';
-      document.getElementById('levelInfo').style.display = '';
-      document.getElementById('levelInfo').textContent = `第 ${curLevel+1} 關`;
+      renderBoard();
+      return;
+    }
+    if (board[a] === board[b]) {
+      board[a] = 1; board[b] = 1;
+      selected = [];
+      renderBoard();
+      checkWin();
+      return;
+    }
+    const gcd = (x, y) => y==0?x:gcd(y, x%y);
+    const g = gcd(board[a], board[b]);
+    if (g > 1) {
+      board[a] /= g;
+      board[b] /= g;
+      selected = [];
+      renderBoard();
+      checkWin();
+    } else {
+      selected = [];
       renderBoard();
     }
+  }
 
-    function selectCell(idx) {
-      if (board[idx] <= 1) return;
-      if (selected.includes(idx)) {
-        selected = selected.filter(x => x !== idx);
-        renderBoard();
-        return;
-      }
-      if (selected.length == 2) selected = [];
-      selected.push(idx);
-      renderBoard();
-      if (selected.length == 2) setTimeout(checkPair, 200);
-    }
-
-    function checkPair() {
-      if (lockState) return;
-      const [a, b] = selected;
-      if (board[a] <= 1 || board[b] <= 1) {
-        selected = [];
-        renderBoard();
-        return;
-      }
-      if (board[a] === board[b]) {
-        board[a] = 1; board[b] = 1;
-        selected = [];
-        renderBoard();
-        checkWin();
-        return;
-      }
-      const gcd = (x, y) => y==0?x:gcd(y, x%y);
-      const g = gcd(board[a], board[b]);
-      if (g > 1) {
-        board[a] /= g;
-        board[b] /= g;
-        selected = [];
-        renderBoard();
-        checkWin();
-      } else {
-        selected = [];
-        renderBoard();
-      }
-    }
-
-    function checkWin() {
-      if (lockState) return;
-      if (board.every(x=>x<=1)) {
-        finishedCount++;
-        setTimeout(()=>{
-          if (curLevel < levels.length-1) {
-            startLevel(curLevel+1);
-          } else {
-            stopTimer();
-            document.getElementById('levelInfo').textContent =
-              `全部通關！\n用時 ${document.getElementById('timer').textContent}`;
-            document.getElementById('board').innerHTML = '';
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('mainTitle').style.display = '';
-          }
-        },350);
-      }
-      else if (!canEliminate()) {
-        document.getElementById('retryBtn').style.display = '';
-      }
-    }
-
-    function canEliminate() {
-      for (let i=0; i<board.length; ++i) {
-        if (board[i]<=1) continue;
-        for (let j=i+1; j<board.length; ++j) {
-          if (board[j]<=1) continue;
-          if (board[i] === board[j]) return true;
-          const gcd = (x, y) => y==0?x:gcd(y, x%y);
-          if (gcd(board[i], board[j])>1) return true;
+  function checkWin() {
+    if (lockState) return;
+    if (board.every(x=>x<=1)) {
+      finishedCount++;
+      setTimeout(()=>{
+        if (curLevel < levels.length-1) {
+          startLevel(curLevel+1);
+        } else {
+          stopTimer();
+          document.getElementById('levelInfo').textContent =
+            `全部通關！\n用時 ${document.getElementById('timer').textContent}`;
+          document.getElementById('board').innerHTML = '';
+          document.getElementById('startBtn').style.display = 'none';
+          document.getElementById('mainTitle').style.display = '';
         }
-      }
-      return false;
+      },350);
     }
+    else if (!canEliminate()) {
+      document.getElementById('retryBtn').style.display = '';
+    }
+  }
 
-    document.getElementById('startBtn').onclick = ()=>{
-      startLevel(0);
-      startCountdownTimer();
-      document.getElementById('mainTitle').style.display = 'none';
-    };
-    document.getElementById('retryBtn').onclick = ()=>{
-      if (lockState) return;
-      startLevel(curLevel);
-      // timer continues
-    };
-    document.getElementById('restartBtn').onclick = ()=>{
-      if (lockState) return;
-      startLevel(curLevel);
-      // timer continues
-    };
+  function canEliminate() {
+    for (let i=0; i<board.length; ++i) {
+      if (board[i]<=1) continue;
+      for (let j=i+1; j<board.length; ++j) {
+        if (board[j]<=1) continue;
+        if (board[i] === board[j]) return true;
+        const gcd = (x, y) => y==0?x:gcd(y, x%y);
+        if (gcd(board[i], board[j])>1) return true;
+      }
+    }
+    return false;
+  }
 
-    // 起始畫面顯示
-    showStartScreen();
-  </script>
-</body>
-</html>
+  document.getElementById('startBtn').onclick = ()=>{
+    startLevel(0);
+    startCountdownTimer();
+    document.getElementById('mainTitle').style.display = 'none';
+  };
+  document.getElementById('retryBtn').onclick = ()=>{
+    if (lockState) return;
+    startLevel(curLevel);
+  };
+  document.getElementById('restartBtn').onclick = ()=>{
+    if (lockState) return;
+    startLevel(curLevel);
+  };
+
+  showStartScreen();
+</script>
